@@ -30,7 +30,7 @@ public class Game {
         ShuffleCards();
         DetermineTeams();
         CURRENT_SUIT = "C";
-
+        System.out.println("new game");
     }
 
     public void InitializeDeck() {
@@ -50,6 +50,9 @@ public class Game {
     }
 
     public void DetermineTeams() {
+
+        TeamOne = new ArrayList<Integer>();
+        TeamTwo = new ArrayList<Integer>();
 
         // Team 1 : Queen of Spades and Jack of Diamonds
 
