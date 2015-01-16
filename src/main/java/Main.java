@@ -1,67 +1,95 @@
-import java.io.IOException;
-import javax.servlet.ServletException;
-import javax.servlet.http.*;
 import org.eclipse.jetty.server.Server;
-import org.eclipse.jetty.servlet.*;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.sql.*;
+import org.eclipse.jetty.servlet.ServletContextHandler;
+import org.eclipse.jetty.servlet.ServletHolder;
+
+import javax.servlet.ServletException;
+import javax.servlet.http.HttpServlet;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.net.ServerSocket;
+import java.net.Socket;
 
 public class Main extends HttpServlet {
-  @Override
-  protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
+    @Override
+    protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
 
-    if (req.getRequestURI().endsWith("/db")) {
-      showDatabase(req,resp);
-    } else {
-      showHome(req,resp);
+            startServer(req, resp);
+
     }
-  }
 
-  private void showHome(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    resp.getWriter().print("Hello from Java!");
-  }
+    private void startServer(HttpServletRequest req, HttpServletResponse resp)
+            throws ServletException, IOException {
+        // declaration section:
+        // declare a server socket and a client socket for the server
+        // declare an input and an output stream
+        ServerSocket listener = null;
+        Socket clientSocket = null;
 
-  private void showDatabase(HttpServletRequest req, HttpServletResponse resp)
-      throws ServletException, IOException {
-    try {
-      Connection connection = getConnection();
+        System.out.println("Hearts Server is Running");
+        // Try to open a server socket on port 9001
+        // Note that we can't choose a port less than 1023 if we are not
+        // privileged users (root)
+        try {
+            listener = new ServerSocket(9001);
+        } catch (IOException e) {
+            System.out.println(e);
+        }
+        // Create a socket object from the ServerSocket to listen and accept
+        // connections.
+        // Open input and output streams
+        try {
+            while (true) {
+                // Create game and players hooked up with sockets
+                Game game = new Game();
+                Game.Player player1 = game.new Player(listener.accept(), 1);
+                Game.Player player2 = game.new Player(listener.accept(), 2);
+                Game.Player player3 = game.new Player(listener.accept(), 3);
+                Game.Player player4 = game.new Player(listener.accept(), 4);
 
-      Statement stmt = connection.createStatement();
-      stmt.executeUpdate("CREATE TABLE IF NOT EXISTS ticks (tick timestamp)");
-      stmt.executeUpdate("INSERT INTO ticks VALUES (now())");
-      ResultSet rs = stmt.executeQuery("SELECT tick FROM ticks");
+                // Configure turns
+                player1.ConfigureNextPlayer(player2);
+                player2.ConfigureNextPlayer(player3);
+                player3.ConfigureNextPlayer(player4);
+                player4.ConfigureNextPlayer(player1);
 
-      String out = "Hello!\n";
-      while (rs.next()) {
-          out += "Read from DB: " + rs.getTimestamp("tick") + "\n";
-      }
+                // Configure which player goes first
+                switch (game.FirstPlayer()) {
+                    case 1:
+                        game.currentPlayer = player1;
+                        break;
+                    case 2:
+                        game.currentPlayer = player2;
+                        break;
+                    case 3:
+                        game.currentPlayer = player3;
+                        break;
+                    case 4:
+                        game.currentPlayer = player4;
+                        break;
+                }
 
-      resp.getWriter().print(out);
-    } catch (Exception e) {
-      resp.getWriter().print("There was an error: " + e.getMessage());
+                // start all player threads
+                player1.start();
+                player2.start();
+                player3.start();
+                player4.start();
+            }
+        } catch (Exception e) {
+            System.out.println(e);
+        } finally {
+            listener.close();
+        }
     }
-  }
 
-  private Connection getConnection() throws URISyntaxException, SQLException {
-    URI dbUri = new URI(System.getenv("DATABASE_URL"));
-
-    String username = dbUri.getUserInfo().split(":")[0];
-    String password = dbUri.getUserInfo().split(":")[1];
-    String dbUrl = "jdbc:postgresql://" + dbUri.getHost() + dbUri.getPath();
-
-    return DriverManager.getConnection(dbUrl, username, password);
-  }
-
-  public static void main(String[] args) throws Exception{
-    Server server = new Server(Integer.valueOf(System.getenv("PORT")));
-    ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
-    context.setContextPath("/");
-    server.setHandler(context);
-    context.addServlet(new ServletHolder(new Main()),"/*");
-    server.start();
-    server.join();
-  }
+    public static void main(String[] args) throws Exception {
+        Server server = new Server(Integer.valueOf(System.getenv("PORT")));
+        ServletContextHandler context = new ServletContextHandler(ServletContextHandler.SESSIONS);
+        context.setContextPath("/");
+        server.setHandler(context);
+        context.addServlet(new ServletHolder(new Main()), "/*");
+        server.start();
+        server.join();
+    }
 }
