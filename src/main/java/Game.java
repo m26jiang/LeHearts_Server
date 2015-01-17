@@ -127,6 +127,19 @@ public class Game {
         }
     }
 
+    public void RemoveCardsFromHands() {
+        RemovePlayerCard(currentPlayer);
+        RemovePlayerCard(currentPlayer.next);
+        RemovePlayerCard(currentPlayer.next.next);
+        RemovePlayerCard(currentPlayer.next.next.next);
+    }
+    public void RemovePlayerCard(Player player) {
+        for (int i = 1; i < CURRENT_HAND.size(); i++) {
+            if (player.hand.contains(CURRENT_HAND.get(i).substring(4))) {
+                player.hand.remove(player.hand.indexOf(CURRENT_HAND.get(i).substring(4)));
+            }
+        }
+    }
     // Winners for current hand
 
     public void EndOfPlay(Player player) {
@@ -144,8 +157,9 @@ public class Game {
         }
 
         // Add current cards to player if it matters
-        AddCards(player);
+        AddCards(currentPlayer);
 
+        RemoveCardsFromHands();
         // RESET HAND, SUIT
         CURRENT_HAND = new ArrayList<String>();
         CURRENT_SUIT = "N";
@@ -312,7 +326,7 @@ public class Game {
             ArrayList<String> current_hand = new ArrayList<String>();
 
             for (int i = 13 * player_num - 13; i < 13 * player_num; i++) {
-                current_hand.add(deck[player_num]);
+                current_hand.add(deck[i]);
             }
 
             this.socket = socket;
