@@ -182,10 +182,6 @@ public class Game {
         TeamOneScore = 0;
         TeamTwoScore = 0;
 
-        PlayerScore(player.next);
-        PlayerScore(player.next.next);
-        PlayerScore(player.next.next.next);
-
         if (TeamOne.contains(player.player_num)) {
             TeamOneScore += PlayerScore(player);
         }
