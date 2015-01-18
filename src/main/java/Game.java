@@ -1,3 +1,5 @@
+package main.java;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -142,7 +144,7 @@ public class Game {
     }
     // Winners for current hand
 
-    public void EndOfPlay(Player player) {
+    public void EndOfPlay(Player player, String card) {
         // Make sure winner goes NEXT
         int winner = HandWinner();
 
@@ -165,6 +167,12 @@ public class Game {
         CURRENT_SUIT = "N";
     }
 
+    // Player param is the current player
+    public void NotifyPlayers(Player player, String card) {
+    	player.next.otherPlayerMoved(card);
+    	player.next.next.otherPlayerMoved(card);
+    	player.next.next.next.otherPlayerMoved(card);
+    }
 
     // Hands are all empty
     public boolean NoHandsLeft(Player player) {
@@ -265,15 +273,19 @@ public class Game {
         // Player plays a card on suit
         if (player == currentPlayer && card.substring(4).equals(CURRENT_SUIT)) {
             // Everyone has played
+
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
-                EndOfPlay(player);
+                EndOfPlay(player, card);
+                NotifyPlayers(player, card);
             } else {
                 // Add card to the current hand
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
 
                 // move to next player
                 currentPlayer = currentPlayer.next;
+                
+                NotifyPlayers(player, card);	
             }
             return true;
         } else if (player == currentPlayer && CURRENT_SUIT.equals("N")) {
@@ -285,18 +297,23 @@ public class Game {
 
             // move to next player
             currentPlayer = currentPlayer.next;
+            
+            NotifyPlayers(player, card);
             return true;
         } else if (player == currentPlayer && !player.HasCurrentSuit()) {
 
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
-                EndOfPlay(player);
+                EndOfPlay(player, card);
+                NotifyPlayers(player, card);
             } else {
                 // Add card to the current hand
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
 
                 // move to next player
                 currentPlayer = currentPlayer.next;
+                
+                NotifyPlayers(player, card);
             }
 
             return true;
