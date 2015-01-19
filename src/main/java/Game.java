@@ -384,6 +384,28 @@ public class Game {
 //                    TallyScores() ? "DEFEAT" : NoHandsLeft() ? "TIE" : "");
         }
 
+        // outputs what player has in their hands
+        public void dealPlayerCards(Player player) {
+        	output.println("DEALING");
+        	for (int i = 0; i < player.hand.size(); i++) {
+        		output.println("PLAYER " + player.player_num + " : " + player.hand.get(i));
+        	}
+        	output.println("DEALING COMPLETE");
+        }
+        
+        // outputs what cards player has WON
+        public void ownedCards(Player player) {
+        	if (player.cards.size() <= 0) {
+        		
+        	} else {
+	        	output.println("OWNED CARDS");
+	        	for (int i = 0; i < player.cards.size(); i++) {
+	        		output.println("OWNS " + player.player_num + " : " + player.cards.get(i));
+	        	}
+        	}
+        }
+        
+        
         /**
          * The run method of this thread.
          */
@@ -392,6 +414,7 @@ public class Game {
                 // The thread is only started after everyone connects.
                 output.println("MESSAGE All players connected");
 
+                dealPlayerCards(currentPlayer);
                 // Tell the first player that it is her turn.
                 if (player_num == FirstPlayer()) {
                     output.println("MESSAGE Your move");

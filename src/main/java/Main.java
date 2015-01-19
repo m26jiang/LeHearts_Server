@@ -72,6 +72,9 @@ public class Main extends HttpServlet {
                         break;
                 }
 
+                // Deal Hands to Players
+                
+                
                 // start all player threads
                 player1.start();
                 player2.start();
