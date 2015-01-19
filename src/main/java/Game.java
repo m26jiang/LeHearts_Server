@@ -387,8 +387,11 @@ public class Game {
         // outputs what player has in their hands
         public void dealPlayerCards(Player player) {
         	output.println("DEALING");
-        	for (int i = 0; i < player.hand.size(); i++) {
-        		output.println("PLAYER " + player.player_num + " : " + player.hand.get(i));
+        	for (int j = 0; j < 4; j++) {
+	        	for (int i = 0; i < player.hand.size(); i++) {
+	        		output.println("PLAYER " + player.player_num + " : " + player.hand.get(i));
+	        	}
+	        	player = player.next;
         	}
         	output.println("DEALING COMPLETE");
         }
