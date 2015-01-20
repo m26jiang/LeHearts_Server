@@ -1,5 +1,8 @@
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
 
+build/classes/AwsCredentials.properties
+src/AwsCredentials.properties
+*.DS_Store
 *.iml
 
 ## Directory-based project format:
