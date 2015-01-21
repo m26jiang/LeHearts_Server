@@ -385,14 +385,16 @@ public class Game {
         }
 
         // outputs what player has in their hands
-        public void dealPlayerCards(Player player) {
-        	output.println("DEALING");
-        	for (int j = 0; j < 4; j++) {
-	        	for (int i = 0; i < player.hand.size(); i++) {
-	        		output.println("PLAYER " + player.player_num + " : " + player.hand.get(i));
-	        	}
-	        	player = player.next;
+        public void dealPlayerCards(Player player, int player_num) {
+        	output.println("DEALING START ");
+        	for (int i = 0; i < 4; i++) {
+        		if (player.player_num != player_num) {
+        			player = player.next;
+        		}
         	}
+	        	for (int i = 0; i < player.hand.size(); i++) {
+	        		output.println("CARD " + player.hand.get(i));
+	        	}
         	output.println("DEALING COMPLETE");
         }
         
@@ -417,7 +419,7 @@ public class Game {
                 // The thread is only started after everyone connects.
                 output.println("MESSAGE All players connected");
 
-                dealPlayerCards(currentPlayer);
+                dealPlayerCards(currentPlayer, player_num);
                 // Tell the first player that it is her turn.
                 if (player_num == FirstPlayer()) {
                     output.println("MESSAGE Your move");

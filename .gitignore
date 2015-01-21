@@ -1,5 +1,5 @@
 # Covers JetBrains IDEs: IntelliJ, RubyMine, PhpStorm, AppCode, PyCharm
-
+target
 build/classes/AwsCredentials.properties
 src/AwsCredentials.properties
 *.DS_Store
