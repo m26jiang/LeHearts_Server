@@ -32,6 +32,7 @@ public class Game {
         ShuffleCards();
         DetermineTeams();
         CURRENT_SUIT = "C";
+        CURRENT_HAND = new ArrayList<String>();
         System.out.println("new game");
     }
 
@@ -100,8 +101,10 @@ public class Game {
 
         for (int i = 0; i < 4; i++) {
             int player = Integer.parseInt(CURRENT_HAND.get(i).substring(0,1));
-            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(4, 5));
-            String suit = CURRENT_HAND.get(i).substring(8);
+            int firstColon = CURRENT_HAND.get(i).indexOf(":") + 2;
+            int secondColon = CURRENT_HAND.get(i).lastIndexOf(":") + 2;
+            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(firstColon, secondColon - 3));
+            String suit = CURRENT_HAND.get(i).substring(secondColon);
 
             if (rank > highest && suit.equals(CURRENT_SUIT)) {
                 highest = rank;
@@ -115,9 +118,11 @@ public class Game {
     // add cards from current_hand to player if matters
     public void AddCards(Player player) {
         for (int i = 0; i < CURRENT_HAND.size(); i++) {
-            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(4, 5));
-            String suit = CURRENT_HAND.get(i).substring(8);
-            String card = CURRENT_HAND.get(i).substring(4);
+            int firstColon = CURRENT_HAND.get(i).indexOf(":") + 2;
+            int secondColon = CURRENT_HAND.get(i).lastIndexOf(":") + 2;
+            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(firstColon, secondColon-3));
+            String suit = CURRENT_HAND.get(i).substring(secondColon);
+            String card = CURRENT_HAND.get(i).substring(firstColon);
 
             if (    suit.equals("H") ||
                     (suit.equals("D") && rank == 11) ||
@@ -136,11 +141,18 @@ public class Game {
         RemovePlayerCard(currentPlayer.next.next.next);
     }
     public void RemovePlayerCard(Player player) {
-        for (int i = 1; i < CURRENT_HAND.size(); i++) {
+        for (int i = 0; i < CURRENT_HAND.size(); i++) {
             if (player.hand.contains(CURRENT_HAND.get(i).substring(4))) {
                 player.hand.remove(player.hand.indexOf(CURRENT_HAND.get(i).substring(4)));
             }
         }
+    }
+    
+    public boolean HasTwoOfClubs(Player player) {
+    	if (player.hand.contains("2 : C")) {
+    		return true;
+    	}
+    	return false;
     }
     // Winners for current hand
 
@@ -165,6 +177,7 @@ public class Game {
         // RESET HAND, SUIT
         CURRENT_HAND = new ArrayList<String>();
         CURRENT_SUIT = "N";
+        
     }
 
     // Player param is the current player
@@ -236,12 +249,14 @@ public class Game {
         int heartscore = 0;
         boolean TenOfClubs = false;
         ArrayList<String> player_cards = player.cards;
-
+        
         Integer[] HeartScores = { 0, -10, -10, -10, -10, -10, -10, -20, -30, -40, -50, -60, -70};
         for (int i = 0; i < player_cards.size(); i++) {
-            int rank = Integer.parseInt(player_cards.get(i).substring(0,1));
-            String suit = player_cards.get(i).substring(4);
 
+            int firstColon = player_cards.get(i).indexOf(":") - 1;
+            int rank = Integer.parseInt(player_cards.get(i).substring(0,firstColon));
+            String suit = player_cards.get(i).substring(firstColon + 3);
+            
             if (suit.equals("H")) {
                 // all hearts?
                 heartscore += HeartScores[rank-2];
@@ -271,13 +286,16 @@ public class Game {
 
     public synchronized boolean legalMove(String card, Player player) {
         // Player plays a card on suit
-        if (player == currentPlayer && card.substring(4).equals(CURRENT_SUIT)) {
+    	if (player == currentPlayer && HasTwoOfClubs(player) && !card.equals("2 : C")) {
+//    		System.out.println(card);
+    		return false;
+    	} else if (player == currentPlayer && card.substring(4).contains(CURRENT_SUIT)) {
             // Everyone has played
 
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
-                EndOfPlay(player, card);
                 NotifyPlayers(player, card);
+                EndOfPlay(player, card);
             } else {
                 // Add card to the current hand
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
@@ -286,6 +304,7 @@ public class Game {
                 currentPlayer = currentPlayer.next;
                 
                 NotifyPlayers(player, card);	
+                currentPlayer.notifyTurn();
             }
             return true;
         } else if (player == currentPlayer && CURRENT_SUIT.equals("N")) {
@@ -299,13 +318,14 @@ public class Game {
             currentPlayer = currentPlayer.next;
             
             NotifyPlayers(player, card);
+            currentPlayer.notifyTurn();
             return true;
         } else if (player == currentPlayer && !player.HasCurrentSuit()) {
 
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
-                EndOfPlay(player, card);
                 NotifyPlayers(player, card);
+                EndOfPlay(player, card);
             } else {
                 // Add card to the current hand
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
@@ -314,10 +334,16 @@ public class Game {
                 currentPlayer = currentPlayer.next;
                 
                 NotifyPlayers(player, card);
+                currentPlayer.notifyTurn();
             }
 
             return true;
         }
+
+//		System.out.println(card);
+//		System.out.println(CURRENT_SUIT);
+//		System.out.println(player.player_num);
+//		System.out.println(currentPlayer.player_num);
         return false;
     }
 
@@ -383,30 +409,46 @@ public class Game {
 //            output.println(
 //                    TallyScores() ? "DEFEAT" : NoHandsLeft() ? "TIE" : "");
         }
+        public void notifyTurn() {
+        	output.println("MESSAGE Your move");
+        }
 
         // outputs what player has in their hands
-        public void dealPlayerCards(Player player, int player_num) {
+        public void dealPlayerCards(Player player) {
         	output.println("DEALING START ");
-        	for (int i = 0; i < 4; i++) {
-        		if (player.player_num != player_num) {
-        			player = player.next;
-        		}
-        	}
+//        	for (int i = 0; i < 4; i++) {
+//        		if (player.player_num != player_num) {
+//        			player = player.next;
+//        		}
+//        	}
 	        	for (int i = 0; i < player.hand.size(); i++) {
 	        		output.println("CARD " + player.hand.get(i));
 	        	}
         	output.println("DEALING COMPLETE");
         }
         
+        // outputs what cards player has
+        public void cardsInHand(Player player) {
+        	if (player.hand.size() <= 0) {
+        		
+        	} else {
+        		output.println("PLAYER_HAND BEGIN");
+	        	for (int i = 0; i < player.hand.size(); i++) {
+	        		output.println(player.hand.get(i));
+	        	}
+        		output.println("PLAYER_HAND END");
+        	}
+        }
         // outputs what cards player has WON
         public void ownedCards(Player player) {
         	if (player.cards.size() <= 0) {
         		
         	} else {
-	        	output.println("OWNED CARDS");
+	        	output.println("OWNED_CARDS BEGIN");
 	        	for (int i = 0; i < player.cards.size(); i++) {
-	        		output.println("OWNS " + player.player_num + " : " + player.cards.get(i));
+	        		output.println(player.cards.get(i));
 	        	}
+	        	output.println("OWNED_CARDS END");
         	}
         }
         
@@ -419,19 +461,21 @@ public class Game {
                 // The thread is only started after everyone connects.
                 output.println("MESSAGE All players connected");
 
-                dealPlayerCards(currentPlayer, player_num);
+                dealPlayerCards(this);
                 // Tell the first player that it is her turn.
                 if (player_num == FirstPlayer()) {
                     output.println("MESSAGE Your move");
                 }
-
+//                String command = "";
                 // Repeatedly get commands from the client and process them.
                 while (true) {
+
                     String command = input.readLine();
                     if (command.startsWith("MOVE")) {
                         String card = command.substring(5);
                         if (legalMove(card, this)) {
                             output.println("VALID_MOVE");
+
                             if (NoHandsLeft(currentPlayer)) {
                                 // tally scores
                                 int team_num = GetWinner(currentPlayer);
@@ -447,11 +491,24 @@ public class Game {
                                     output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
                                 }
                             }
+                            if (CURRENT_SUIT.equals("N")) {
+	                            // Notify Winner
+	                            currentPlayer.notifyTurn();
+                            }
                         } else {
-                            output.println("MESSAGE ?");
+                            output.println("MESSAGE INVALID_MOVE");
+                            output.println("MESSAGE Your move");
+//                            command = input.readLine();
+                            continue;
                         }
                     } else if (command.startsWith("QUIT")) {
                         return;
+                    } else if (command.startsWith("HAND?")) {
+                    	cardsInHand(this);
+                        output.println("MESSAGE Your move");
+                    } else if (command.startsWith("CARDS?")) {
+                    	ownedCards(this);
+                        output.println("MESSAGE Your move");
                     }
                 }
             } catch (IOException e) {
