@@ -1,24 +1,40 @@
 # LeHearts_Server
 
-The current server is operating [HERE](https://lehearts.herokuapp.com/)
+The current server is operating [HERE](http://lehearts-env.elasticbeanstalk.com/)
 
 ## To Run LOCALLY:
 
-Make sure you have Java and Maven installed.  Also, install the [Heroku Toolbelt](https://toolbelt.heroku.com/).
+Make sure you have Java 7, Eclipse and Tomcat Apache installed.  
 
 ```sh
-$ mvn install
-$ foreman start web
+1. Import the project to Eclipse
+2. Add a Tomcat Apache server, and target the imported project 
+3. Start the server 
 ```
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
+Server should now be running on [localhost:8080/LeHearts_Server/](http://localhost:8080/LeHearts_Server/).
 
-## Server Essentials
+## Server Example Commands (Using Client)
 
-This server will handle the web requests from the client, saving the state of the game in a database.
+Playing 2 of clubs
+```sh
+MOVE 2 : C
+```
 
-Server will make sure the request from client is LEGAL (passes rules), and send back a response.
+Requesting Player Hand
+```
+HAND?
+```
 
+Requesting Player cards (Won from tricks)
+```
+CARDS? 
+```
+
+Exit Game
+```
+QUIT
+```
 
 
 
