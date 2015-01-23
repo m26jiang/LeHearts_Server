@@ -103,7 +103,7 @@ public class Game {
             int player = Integer.parseInt(CURRENT_HAND.get(i).substring(0,1));
             int firstColon = CURRENT_HAND.get(i).indexOf(":") + 2;
             int secondColon = CURRENT_HAND.get(i).lastIndexOf(":") + 2;
-            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(firstColon, secondColon - 3));
+            int rank =  Integer.parseInt(CURRENT_HAND.get(i).substring(firstColon,secondColon - 3));
             String suit = CURRENT_HAND.get(i).substring(secondColon);
 
             if (rank > highest && suit.equals(CURRENT_SUIT)) {
@@ -182,9 +182,9 @@ public class Game {
 
     // Player param is the current player
     public void NotifyPlayers(Player player, String card) {
-    	player.next.otherPlayerMoved(card);
-    	player.next.next.otherPlayerMoved(card);
-    	player.next.next.next.otherPlayerMoved(card);
+    	player.next.otherPlayerMoved(card, player.player_num);
+    	player.next.next.otherPlayerMoved(card, player.player_num);
+    	player.next.next.next.otherPlayerMoved(card, player.player_num);
     }
 
     // Hands are all empty
@@ -309,7 +309,8 @@ public class Game {
             return true;
         } else if (player == currentPlayer && CURRENT_SUIT.equals("N")) {
             // Add new suit
-            CURRENT_SUIT = card.substring(4);
+        	int firstColon = card.indexOf(":") + 2;
+            CURRENT_SUIT = card.substring(firstColon);
 
             // Add card to the current hand
             CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
@@ -402,15 +403,15 @@ public class Game {
         /**
          * Handles the otherPlayerMoved message.
          */
-        public void otherPlayerMoved(String card) {
-            output.println("PLAYER_MOVED " + card);
+        public void otherPlayerMoved(String card, int num) {
+            output.println("PLAYER_MOVED " + num + " : " + card);
 
 //            if
 //            output.println(
 //                    TallyScores() ? "DEFEAT" : NoHandsLeft() ? "TIE" : "");
         }
         public void notifyTurn() {
-        	output.println("MESSAGE Your move");
+        	output.println("YOUR_TURN");
         }
 
         // outputs what player has in their hands
@@ -452,6 +453,13 @@ public class Game {
         	}
         }
         
+        public void currentHand(Player player) {
+        	output.println("CURRENT_HAND BEGIN");
+        	for (int i = 0; i < CURRENT_HAND.size(); i++) {
+            	output.println(CURRENT_HAND.get(i));
+        	}
+        	output.println("CURRENT_HAND END");
+        }
         
         /**
          * The run method of this thread.
@@ -464,14 +472,14 @@ public class Game {
                 dealPlayerCards(this);
                 // Tell the first player that it is her turn.
                 if (player_num == FirstPlayer()) {
-                    output.println("MESSAGE Your move");
+                    output.println("YOUR_TURN");
                 }
 //                String command = "";
                 // Repeatedly get commands from the client and process them.
                 while (true) {
 
                     String command = input.readLine();
-                    if (command.startsWith("MOVE")) {
+                    if (command.startsWith("MOVE") && command.contains(":")) {
                         String card = command.substring(5);
                         if (legalMove(card, this)) {
                             output.println("VALID_MOVE");
@@ -496,8 +504,8 @@ public class Game {
 	                            currentPlayer.notifyTurn();
                             }
                         } else {
-                            output.println("MESSAGE INVALID_MOVE");
-                            output.println("MESSAGE Your move");
+                            output.println("INVALID_MOVE");
+                            output.println("YOUR_TURN");
 //                            command = input.readLine();
                             continue;
                         }
@@ -505,10 +513,19 @@ public class Game {
                         return;
                     } else if (command.startsWith("HAND?")) {
                     	cardsInHand(this);
-                        output.println("MESSAGE Your move");
+                        output.println("YOUR_TURN");
                     } else if (command.startsWith("CARDS?")) {
                     	ownedCards(this);
-                        output.println("MESSAGE Your move");
+                        output.println("YOUR_TURN");
+                    } else if (command.startsWith("CURRENT_SUIT?")) {
+                    	output.println(CURRENT_SUIT);
+                    	output.println("YOUR_TURN");
+                    } else if (command.startsWith("CURRENT_HAND?")) {
+                    	currentHand(this);
+                    	output.println("YOUR_TURN");
+                    } else if (!command.contains(":")) {
+                        output.println("INVALID_MOVE");
+                        output.println("YOUR_TURN");
                     }
                 }
             } catch (IOException e) {
