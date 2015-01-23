@@ -31,6 +31,16 @@ Requesting Player cards (Won from tricks)
 CARDS? 
 ```
 
+Requesting Current Suit in Play
+```
+CURRENT_SUIT?
+```
+
+Requesting Current Cards on Table
+```
+CURRENT_HAND?
+```
+
 Exit Game
 ```
 QUIT
