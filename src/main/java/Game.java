@@ -442,15 +442,31 @@ public class Game {
         }
         // outputs what cards player has WON
         public void ownedCards(Player player) {
-        	if (player.cards.size() <= 0) {
-        		
-        	} else {
+        	if (player.cards.size() > 0) {
 	        	output.println("OWNED_CARDS BEGIN");
-	        	for (int i = 0; i < player.cards.size(); i++) {
-	        		output.println(player.cards.get(i));
-	        	}
+	        	ownedCard(player);
+            	ownedCard(player.next);
+            	ownedCard(player.next.next);
+            	ownedCard(player.next.next.next);
 	        	output.println("OWNED_CARDS END");
         	}
+        }
+        
+        public void ownedCard(Player player) {
+        	for (int i = 0; i < player.cards.size(); i++) {
+        		output.println(player.player_num + " : " + player.cards.get(i));
+        	}
+        }
+        public void allCurrentScores(Player player) {
+        	output.println("PLAYER_SCORES BEGIN");
+    		currentScore(player);
+    		currentScore(player.next);
+    		currentScore(player.next.next);
+    		currentScore(player.next.next.next);
+        	output.println("PLAYER_SCORES END");
+        }
+        public void currentScore(Player player) {
+        	output.println(player.player_num + " : " + PlayerScore(player));	
         }
         
         public void currentHand(Player player) {
@@ -522,6 +538,9 @@ public class Game {
                     	output.println("YOUR_TURN");
                     } else if (command.startsWith("CURRENT_HAND?")) {
                     	currentHand(this);
+                    	output.println("YOUR_TURN");
+                    } else if (command.startsWith("PLAYER_SCORES?")){
+                    	allCurrentScores(this);
                     	output.println("YOUR_TURN");
                     } else if (!command.contains(":")) {
                         output.println("INVALID_MOVE");
