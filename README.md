@@ -26,7 +26,7 @@ Requesting Player Hand
 HAND?
 ```
 
-Requesting Player cards (Won from tricks)
+Requesting ALL Player cards (Won from tricks)
 ```
 CARDS? 
 ```
@@ -39,6 +39,11 @@ CURRENT_SUIT?
 Requesting Current Cards on Table
 ```
 CURRENT_HAND?
+```
+
+Requesting All Player Scores (From won cards)
+```
+PLAYER_SCORES?
 ```
 
 Exit Game
