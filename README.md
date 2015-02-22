@@ -46,6 +46,11 @@ Requesting All Player Scores (From won cards)
 PLAYER_SCORES?
 ```
 
+Request to Change Name of Player
+```
+SET_PLAYER_NAME 1 : APlayerName
+```
+
 Exit Game
 ```
 QUIT

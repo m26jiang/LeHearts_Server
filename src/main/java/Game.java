@@ -129,8 +129,12 @@ public class Game {
                     (suit.equals("S") && rank == 12) ||
                     (suit.equals("C") && rank == 10) ) {
                 player.cards.add(card);
+                
+                player.notifyCollectedCard(card, player.player_num);
+                player.next.notifyCollectedCard(card, player.player_num);
+                player.next.next.notifyCollectedCard(card, player.player_num);
+                player.next.next.next.notifyCollectedCard(card, player.player_num);
             }
-
         }
     }
 
@@ -177,6 +181,8 @@ public class Game {
         // RESET HAND, SUIT
         CURRENT_HAND = new ArrayList<String>();
         CURRENT_SUIT = "N";
+
+        NotifyEndOfRound(player);
         
     }
 
@@ -187,6 +193,14 @@ public class Game {
     	player.next.next.next.otherPlayerMoved(card, player.player_num);
     }
 
+    // Player param is the current player
+    public void NotifyEndOfRound(Player player) {
+    	player.notifyEndOfRound();
+    	player.next.notifyEndOfRound();
+    	player.next.next.notifyEndOfRound();
+    	player.next.next.next.notifyEndOfRound();
+    }
+    
     // Hands are all empty
     public boolean NoHandsLeft(Player player) {
 
@@ -350,6 +364,7 @@ public class Game {
 
     class Player extends Thread {
         int player_num;
+        String player_name;
         ArrayList<String> hand;
         ArrayList<String> cards;
         Player next;
@@ -414,6 +429,17 @@ public class Game {
         	output.println("YOUR_TURN");
         }
 
+        /**
+         * Notifies the client that card was collected
+         */
+        public void notifyCollectedCard(String card, int p_num) {
+        	output.println("PLAYER_COLLECTED " + p_num + " : " + card);
+        }
+        
+        public void notifyEndOfRound() {
+        	output.println("ROUND_ENDED");
+        }
+       
         // outputs what player has in their hands
         public void dealPlayerCards(Player player) {
         	output.println("DEALING START ");
@@ -475,6 +501,29 @@ public class Game {
             	output.println(CURRENT_HAND.get(i));
         	}
         	output.println("CURRENT_HAND END");
+        }
+        
+        /**
+         * Recieves client request to change name, and restablishes name in player
+         * @param player
+         * @param command
+         */
+        public void setPlayerNames(Player player, String command) {
+        	int player_id = Integer.parseInt(command.substring(command.indexOf(" ")+1, command.indexOf(" ")+2));
+        	String player_name = command.substring(command.indexOf(":") + 1);
+        	for (int i = 0; i < 4; i++) {
+        		if (player.player_num == player_id) {
+        			player.player_name = player_name;
+        		}
+        		player = player.next;
+        	}
+        }
+        
+        public void notifyPlayerNames(Player player) {
+        	for (int i = 0; i < 4; i++) {
+        		output.println("PLAYER_NAME " + player.player_num + " : " + player.player_name);
+        		player = player.next;
+        	}
         }
         
         /**
@@ -545,6 +594,9 @@ public class Game {
                     } else if (!command.contains(":")) {
                         output.println("INVALID_MOVE");
                         output.println("YOUR_TURN");
+                    } else if (command.contains("SET_PLAYER_NAME")) {
+                    	setPlayerNames(this, command);
+                    	notifyPlayerNames(this);
                     }
                 }
             } catch (IOException e) {
