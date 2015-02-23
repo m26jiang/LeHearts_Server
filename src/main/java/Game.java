@@ -515,8 +515,8 @@ public class Game {
          * @param player
          * @param command
          */
-        public void setPlayerNames(Player player, String command) {
-        	String player_name = command.substring(command.indexOf(":") + 1);
+        public void setPlayerName(Player player, String command) {
+        	String player_name = command.substring(command.indexOf(" ") + 1);
         	player.player_name = player_name;
         }
         
@@ -596,7 +596,7 @@ public class Game {
                         output.println("INVALID_MOVE");
                         output.println("YOUR_TURN");
                     } else if (command.contains("SET_PLAYER_NAME")) {
-                    	setPlayerNames(this, command);
+                    	setPlayerName(this, command);
                     } else if (command.contains("PLAYER_NAMES?")) {
                     	notifyPlayerNames(this);
                     }

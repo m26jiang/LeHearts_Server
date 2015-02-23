@@ -48,7 +48,7 @@ PLAYER_SCORES?
 
 Request to Change Name of Player
 ```
-SET_PLAYER_NAME 1 : APlayerName
+SET_PLAYER_NAME APlayerName
 ```
 
 Exit Game
