@@ -204,8 +204,10 @@ public class Game {
     // Hands are all empty
     public boolean NoHandsLeft(Player player) {
 
-        if (player.hand.size() + player.next.hand.size() + player.next.next.hand.size() + player.next.next.next.hand.size() == 0) {
-            return true;
+    	// if game isnt over, make it over
+        if (!player.isGameOver && player.hand.size() + player.next.hand.size() + player.next.next.hand.size() + player.next.next.next.hand.size() == 0) {
+        	player.isGameOver = true;
+        	return true;
         }
 
         return false;
@@ -366,6 +368,7 @@ public class Game {
     class Player extends Thread {
         int player_num;
         String player_name;
+        boolean isGameOver = false;
         ArrayList<String> hand;
         ArrayList<String> cards;
         Player next;
@@ -513,14 +516,8 @@ public class Game {
          * @param command
          */
         public void setPlayerNames(Player player, String command) {
-        	int player_id = Integer.parseInt(command.substring(command.indexOf(" ")+1, command.indexOf(" ")+2));
         	String player_name = command.substring(command.indexOf(":") + 1);
-        	for (int i = 0; i < 4; i++) {
-        		if (player.player_num == player_id) {
-        			player.player_name = player_name;
-        		}
-        		player = player.next;
-        	}
+        	player.player_name = player_name;
         }
         
         public void notifyPlayerNames(Player player) {
@@ -543,30 +540,32 @@ public class Game {
                 if (player_num == FirstPlayer()) {
                     output.println("YOUR_TURN");
                 }
-//                String command = "";
+                String command = "";
                 // Repeatedly get commands from the client and process them.
                 while (true) {
+                	if (input.ready()) {
+                		command = input.readLine(); 
+                	} else {
+                		if (NoHandsLeft(currentPlayer)) {
+                            // tally scores
+                            int team_num = GetWinner(currentPlayer);
 
-                    String command = input.readLine();
+                            // Output winners
+                            if (TeamOne.contains(player_num) && team_num == 1) {
+                                output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
+                            } else if (TeamTwo.contains(player_num) && team_num == 2){
+                                output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
+                            } else if (TeamOne.contains(player_num) && team_num == 2) {
+                                output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
+                            } else if (TeamTwo.contains(player_num) && team_num == 1) {
+                                output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
+                            }
+                    	}
+                	}
+                    
                     if (command.startsWith("MOVE") && command.contains(":")) {
                         String card = command.substring(5);
-                        if (legalMove(card, this)) {
-
-                            if (NoHandsLeft(currentPlayer)) {
-                                // tally scores
-                                int team_num = GetWinner(currentPlayer);
-
-                                // Output winners
-                                if (TeamOne.contains(player_num) && team_num == 1) {
-                                    output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
-                                } else if (TeamTwo.contains(player_num) && team_num == 2){
-                                    output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
-                                } else if (TeamOne.contains(player_num) && team_num == 2) {
-                                    output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
-                                } else if (TeamTwo.contains(player_num) && team_num == 1) {
-                                    output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
-                                }
-                            }
+                        if (legalMove(card, this)) {                            
                             if (CURRENT_SUIT.equals("N")) {
 	                            // Notify Winner
 	                            currentPlayer.notifyTurn();
@@ -574,7 +573,6 @@ public class Game {
                         } else {
                             output.println("INVALID_MOVE");
                             output.println("YOUR_TURN");
-//                            command = input.readLine();
                             continue;
                         }
                     } else if (command.startsWith("QUIT")) {
@@ -599,6 +597,7 @@ public class Game {
                         output.println("YOUR_TURN");
                     } else if (command.contains("SET_PLAYER_NAME")) {
                     	setPlayerNames(this, command);
+                    } else if (command.contains("PLAYER_NAMES?")) {
                     	notifyPlayerNames(this);
                     }
                 }
