@@ -305,7 +305,7 @@ public class Game {
     		return false;
     	} else if (player == currentPlayer && card.substring(4).contains(CURRENT_SUIT)) {
             // Everyone has played
-
+    		currentPlayer.notifyValidMove();
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
                 NotifyPlayers(player, card);
@@ -323,6 +323,7 @@ public class Game {
             return true;
         } else if (player == currentPlayer && CURRENT_SUIT.equals("N")) {
             // Add new suit
+    		currentPlayer.notifyValidMove();
         	int firstColon = card.indexOf(":") + 2;
             CURRENT_SUIT = card.substring(firstColon);
 
@@ -336,7 +337,7 @@ public class Game {
             currentPlayer.notifyTurn();
             return true;
         } else if (player == currentPlayer && !player.HasCurrentSuit()) {
-
+    		currentPlayer.notifyValidMove();
             if (CURRENT_HAND.size() == 3) {
                 CURRENT_HAND.add(currentPlayer.player_num + " : " + card);
                 NotifyPlayers(player, card);
@@ -424,6 +425,9 @@ public class Game {
 //            if
 //            output.println(
 //                    TallyScores() ? "DEFEAT" : NoHandsLeft() ? "TIE" : "");
+        }
+        public void notifyValidMove() {
+        	output.println("VALID_MOVE");
         }
         public void notifyTurn() {
         	output.println("YOUR_TURN");
@@ -547,7 +551,6 @@ public class Game {
                     if (command.startsWith("MOVE") && command.contains(":")) {
                         String card = command.substring(5);
                         if (legalMove(card, this)) {
-                            output.println("VALID_MOVE");
 
                             if (NoHandsLeft(currentPlayer)) {
                                 // tally scores
