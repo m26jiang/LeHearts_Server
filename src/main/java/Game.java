@@ -213,6 +213,7 @@ public class Game {
         return false;
     }
 
+    
 
     // Count Scores
     public int GetWinner(Player player) {
@@ -403,7 +404,25 @@ public class Game {
                 System.out.println("Player died: " + e);
             }
         }
-
+        
+        public void endGame(Player player) {
+        	
+        	// tally scores
+            int team_num = GetWinner(player);
+            int player_num = player.player_num;
+            
+            // Output winners
+            if (TeamOne.contains(player_num) && team_num == 1) {
+                output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
+            } else if (TeamTwo.contains(player_num) && team_num == 2){
+                output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
+            } else if (TeamOne.contains(player_num) && team_num == 2) {
+                output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
+            } else if (TeamTwo.contains(player_num) && team_num == 1) {
+                output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
+            }
+        }
+        
         public boolean HasCurrentSuit() {
             for (int i = 0; i < hand.size(); i++) {
                 if (hand.get(i).contains(CURRENT_SUIT)) {
@@ -446,7 +465,13 @@ public class Game {
         public void notifyEndOfRound() {
         	output.println("ROUND_ENDED");
         }
-       
+
+        public void notifyWinners(Player player) {
+        	for (int i = 0; i < 4; i++) {
+        		endGame(player);
+        		player = player.next;
+        	}
+        }
         // outputs what player has in their hands
         public void dealPlayerCards(Player player) {
         	output.println("DEALING START ");
@@ -520,9 +545,16 @@ public class Game {
         	player.player_name = player_name;
         }
         
+        public void notifyPlayerName(Player player) {
+        	for (int i = 0; i < 4; i++) {
+            	output.println("PLAYER_NAME " + player.player_num + " : " + player.player_name);
+            	player = player.next;
+        	}
+        }
+        
         public void notifyPlayerNames(Player player) {
         	for (int i = 0; i < 4; i++) {
-        		output.println("PLAYER_NAME " + player.player_num + " : " + player.player_name);
+        		player.notifyPlayerName(player);
         		player = player.next;
         	}
         }
@@ -576,27 +608,15 @@ public class Game {
 	                    } else if (command.startsWith("PLAYER_SCORES?")){
 	                    	allCurrentScores(this);
 	                    	output.println("YOUR_TURN");
-	                    } else if (!command.contains(":") && command.length() != 0 ) {
-	                        output.println("INVALID_MOVE");
-	                        output.println("YOUR_TURN");
 	                    } else if (command.contains("SET_PLAYER_NAME")) {
 	                    	setPlayerName(this, command);
 	                    	notifyPlayerNames(this);
+	                    }  else if (!command.contains(":") && command.length() != 0 ) {
+	                        output.println("INVALID_MOVE");
+	                        output.println("YOUR_TURN");
 	                    } 
                 	} else if (NoHandsLeft(currentPlayer)) {
-                        // tally scores
-                        int team_num = GetWinner(currentPlayer);
-
-                        // Output winners
-                        if (TeamOne.contains(player_num) && team_num == 1) {
-                            output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
-                        } else if (TeamTwo.contains(player_num) && team_num == 2){
-                            output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
-                        } else if (TeamOne.contains(player_num) && team_num == 2) {
-                            output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
-                        } else if (TeamTwo.contains(player_num) && team_num == 1) {
-                            output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
-                        }
+                        notifyWinners(currentPlayer);
                     }
                 }
             } catch (IOException e) {
