@@ -252,7 +252,7 @@ public class Game {
             TeamTwoScore += PlayerScore(player.next.next.next);
         }
 
-        if (TeamOneScore > TeamOneScore) {
+        if (TeamOneScore > TeamTwoScore) {
             return 1;
         } else {
             return 2;
@@ -409,6 +409,7 @@ public class Game {
         	
         	// tally scores
             int team_num = GetWinner(player);
+            
             int player_num = player.player_num;
             
             // Output winners
@@ -468,7 +469,7 @@ public class Game {
 
         public void notifyWinners(Player player) {
         	for (int i = 0; i < 4; i++) {
-        		endGame(player);
+        		player.endGame(player);
         		player = player.next;
         	}
         }
