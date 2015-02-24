@@ -540,65 +540,63 @@ public class Game {
                 if (player_num == FirstPlayer()) {
                     output.println("YOUR_TURN");
                 }
-                String command = "";
                 // Repeatedly get commands from the client and process them.
                 while (true) {
+                    String command = "";
                 	if (input.ready()) {
                 		command = input.readLine(); 
-                	} else {
-                		if (NoHandsLeft(currentPlayer)) {
-                            // tally scores
-                            int team_num = GetWinner(currentPlayer);
+                	
+	                    if (command.startsWith("MOVE") && command.contains(":")) {
+	                        String card = command.substring(5);
+	                        if (legalMove(card, this)) {                            
+	                            if (CURRENT_SUIT.equals("N")) {
+		                            // Notify Winner
+		                            currentPlayer.notifyTurn();
+	                            }
+	                        } else if (card.length() > 0) {
+	                        	output.println(card);
+	                            output.println("INVALID_MOVE");
+	                            output.println("YOUR_TURN");
+	                            continue;
+	                        }
+	                    } else if (command.startsWith("QUIT")) {
+	                        return;
+	                    } else if (command.startsWith("HAND?")) {
+	                    	cardsInHand(this);
+	                        output.println("YOUR_TURN");
+	                    } else if (command.startsWith("CARDS?")) {
+	                    	ownedCards(this);
+	                        output.println("YOUR_TURN");
+	                    } else if (command.startsWith("CURRENT_SUIT?")) {
+	                    	output.println(CURRENT_SUIT);
+	                    	output.println("YOUR_TURN");
+	                    } else if (command.startsWith("CURRENT_HAND?")) {
+	                    	currentHand(this);
+	                    	output.println("YOUR_TURN");
+	                    } else if (command.startsWith("PLAYER_SCORES?")){
+	                    	allCurrentScores(this);
+	                    	output.println("YOUR_TURN");
+	                    } else if (!command.contains(":") && command.length() != 0 ) {
+	                        output.println("INVALID_MOVE");
+	                        output.println("YOUR_TURN");
+	                    } else if (command.contains("SET_PLAYER_NAME")) {
+	                    	setPlayerName(this, command);
+	                    	notifyPlayerNames(this);
+	                    } 
+                	} else if (NoHandsLeft(currentPlayer)) {
+                        // tally scores
+                        int team_num = GetWinner(currentPlayer);
 
-                            // Output winners
-                            if (TeamOne.contains(player_num) && team_num == 1) {
-                                output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
-                            } else if (TeamTwo.contains(player_num) && team_num == 2){
-                                output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
-                            } else if (TeamOne.contains(player_num) && team_num == 2) {
-                                output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
-                            } else if (TeamTwo.contains(player_num) && team_num == 1) {
-                                output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
-                            }
-                    	}
-                	}
-                    
-                    if (command.startsWith("MOVE") && command.contains(":")) {
-                        String card = command.substring(5);
-                        if (legalMove(card, this)) {                            
-                            if (CURRENT_SUIT.equals("N")) {
-	                            // Notify Winner
-	                            currentPlayer.notifyTurn();
-                            }
-                        } else {
-                            output.println("INVALID_MOVE");
-                            output.println("YOUR_TURN");
-                            continue;
+                        // Output winners
+                        if (TeamOne.contains(player_num) && team_num == 1) {
+                            output.println("WIN : " + TeamOneScore + " > " + TeamTwoScore );
+                        } else if (TeamTwo.contains(player_num) && team_num == 2){
+                            output.println("WIN : " + TeamTwoScore + " > " + TeamOneScore );
+                        } else if (TeamOne.contains(player_num) && team_num == 2) {
+                            output.println("LOSE : " + TeamOneScore + " < " + TeamTwoScore );
+                        } else if (TeamTwo.contains(player_num) && team_num == 1) {
+                            output.println("LOSE : " + TeamTwoScore + " < " + TeamOneScore );
                         }
-                    } else if (command.startsWith("QUIT")) {
-                        return;
-                    } else if (command.startsWith("HAND?")) {
-                    	cardsInHand(this);
-                        output.println("YOUR_TURN");
-                    } else if (command.startsWith("CARDS?")) {
-                    	ownedCards(this);
-                        output.println("YOUR_TURN");
-                    } else if (command.startsWith("CURRENT_SUIT?")) {
-                    	output.println(CURRENT_SUIT);
-                    	output.println("YOUR_TURN");
-                    } else if (command.startsWith("CURRENT_HAND?")) {
-                    	currentHand(this);
-                    	output.println("YOUR_TURN");
-                    } else if (command.startsWith("PLAYER_SCORES?")){
-                    	allCurrentScores(this);
-                    	output.println("YOUR_TURN");
-                    } else if (!command.contains(":")) {
-                        output.println("INVALID_MOVE");
-                        output.println("YOUR_TURN");
-                    } else if (command.contains("SET_PLAYER_NAME")) {
-                    	setPlayerName(this, command);
-                    } else if (command.contains("PLAYER_NAMES?")) {
-                    	notifyPlayerNames(this);
                     }
                 }
             } catch (IOException e) {
