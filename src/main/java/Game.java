@@ -587,7 +587,6 @@ public class Game {
 		                            currentPlayer.notifyTurn();
 	                            }
 	                        } else if (card.length() > 0) {
-	                        	output.println(card);
 	                            output.println("INVALID_MOVE");
 	                            output.println("YOUR_TURN");
 	                            continue;
